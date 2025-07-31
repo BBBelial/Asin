@@ -1,598 +1,362 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asin快捷打开详情页工具</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            color: #343a40;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 25px 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            width: 100%;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            width: 100%;
-            padding: 0 15px;
-        }
-        
-        h1 {
-            color: #232f3e;
-            margin-bottom: 15px;
-            font-size: 2.2rem;
-        }
-        
-        .subtitle {
-            color: #6c757d;
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto 20px;
-        }
-        
-        .region-group {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-        }
-        
-        .region-group:hover {
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-            transform: translateY(-3px);
-        }
-        
-        summary {
-            display: flex;
-            align-items: center;
-            padding: 20px 25px;
-            background: linear-gradient(to right, #232f3e, #37475a);
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            position: relative;
-            list-style: none;
-        }
-        
-        summary:hover {
-            background: linear-gradient(to right, #37475a, #4a5c6e);
-        }
-        
-        summary::after {
-            content: "›";
-            position: absolute;
-            right: 25px;
-            top: 50%;
-            transform: translateY(-50%) rotate(90deg);
-            font-size: 1.5rem;
-            transition: transform 0.3s;
-        }
-        
-        details[open] summary::after {
-            transform: translateY(-50%) rotate(-90deg);
-        }
-        
-        .columns-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 25px;
-            padding: 25px;
-            background-color: white;
-        }
-        
-        .column {
-            flex: 1;
-            min-width: 280px;
-        }
-        
-        .query-group {
-            margin-bottom: 25px;
-            padding: 18px;
-            border-radius: 10px;
-            background-color: #f8f9fa;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-        
-        .query-group:hover {
-            background-color: #edfdff;
-            transform: translateX(5px);
-        }
-        
-        .region-title {
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #0F1111;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .region-title::before {
-            content: "";
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #FF9900;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 15px;
-        }
-        
-        input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        
-        button {
-            padding: 12px 20px;
-            background: linear-gradient(to bottom, #FF9900, #FF8000);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 0.95rem;
-            min-width: 120px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        button:hover {
-            background: linear-gradient(to bottom, #FF8000, #FF6600);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        button:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .validation {
-            color: #dc3545;
-            font-size: 0.9rem;
-            height: 20px;
-            margin-top: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .columns-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .column {
-                width: 100%;
-                min-width: 100%;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-            
-            button {
-                width: 100%;
-            }
-            
-            summary {
-                padding: 15px 20px;
-                font-size: 1.1rem;
-            }
-        }
-        
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9rem;
-            padding: 20px;
-            width: 100%;
-        }
-        
-        /* 各区域颜色标识 */
-        .north-america summary { background: linear-gradient(to right, #3498db, #2c3e50); }
-        .north-america .region-title::before { background-color: #3498db; }
-        
-        .europe summary { background: linear-gradient(to right, #9b59b6, #8e44ad); }
-        .europe .region-title::before { background-color: #9b59b6; }
-        
-        .asia summary { background: linear-gradient(to right, #e74c3c, #c0392b); }
-        .asia .region-title::before { background-color: #e74c3c; }
-        
-        .other summary { background: linear-gradient(to right, #2ecc71, #27ae60); }
-        .other .region-title::before { background-color: #2ecc71; }
-        
-        .highlight {
-            animation: highlight 1.5s ease;
-        }
-        
-        @keyframes highlight {
-            0% { background-color: rgba(255, 255, 0, 0.3); }
-            100% { background-color: transparent; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Amazon 查询工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f2f5;
+      margin: 0;
+    }
+
+    .section {
+      max-width: 900px;
+      margin: 30px auto;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .flex-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    select, input, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    select {
+      min-width: 160px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    button {
+      background-color: #FF9900;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #FF8000;
+    }
+
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      display: none;
+      margin-top: -5px;
+      margin-bottom: 10px;
+    }
+
+    .warning {
+      background: #fce8e6;
+      color: #d93025;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px auto;
+      max-width: 700px;
+    }
+
+    #postal-display {
+      min-width: 80px;
+      font-size: 1rem;
+      padding: 10px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    /* 提示浮层样式 */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #28a745;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 9999;
+      animation: fadein 0.3s;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeout {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(10px); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Asin快捷打开详情页工具</h1>
-            <p class="subtitle">通过ASIN快速打开Amazon各站点商品详情页。</p>
-        </header>
-        
-        <!-- 北美区域 -->
-        <details open class="region-group north-america">
-            <summary>北美地区（3个国家）</summary>
-            <div class="columns-container">
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">美国 Amazon.com 邮编95476(加州索诺玛地区)</div>
-                        <div class="input-group">
-                            <input type="text" data-region="us" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('us')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="us-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">加拿大 Amazon.ca 邮编K7L 2H9(安省Kingston)</div>
-                        <div class="input-group">
-                            <input type="text" data-region="ca" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('ca')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="ca-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">墨西哥 Amazon.com.mx 邮编04510（Álvaro Obregón）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="mx" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('mx')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="mx-msg"></div>
-                    </div>
-                </div>
-                
-                <div class="column">
-                    <!-- 北美区域只包含三个国家，此处保留空白用于未来扩展 -->
-                </div>
-            </div>
-        </details>
-        
-        <!-- 欧洲区域 -->
-        <details class="region-group europe">
-            <summary>欧洲地区（10个国家）</summary>
-            <div class="columns-container">
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">英国 Amazon.co.uk 邮编N20 8JJ（伦敦Barnet区）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="uk" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('uk')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="uk-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">德国 Amazon.de 邮编10115（柏林Mitte）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="de" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('de')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="de-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">法国 Amazon.fr 邮编75000（巴黎）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="fr" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('fr')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="fr-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">意大利 Amazon.it 邮编50100（佛罗伦萨）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="it" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('it')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="it-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">西班牙 Amazon.es 邮编08000（巴塞罗那）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="es" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('es')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="es-msg"></div>
-                    </div>
-                </div>
-                
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">荷兰 Amazon.nl 邮编1000AA（阿姆斯特丹）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="nl" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('nl')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="nl-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">比利时 Amazon.com.be 邮编1000（布鲁塞尔）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="be" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('be')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="be-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">爱尔兰 Amazon.ie 邮编999015（都柏林）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="ie" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('ie')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="ie-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">瑞典 Amazon.se 邮编23168（赫尔辛堡）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="se" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('se')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="se-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">波兰 Amazon.pl 邮编00-001（华沙）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="pl" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('pl')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="pl-msg"></div>
-                    </div>
-                </div>
-            </div>
-        </details>
-        
-        <!-- 亚洲区域 -->
-        <details class="region-group asia">
-            <summary>亚洲地区（5个国家）</summary>
-            <div class="columns-container">
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">日本 Amazon.co.jp 邮编163-8001（东京新宿）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="jp" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('jp')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="jp-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">新加坡 Amazon.sg 邮编546080（后港）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="sg" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('sg')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="sg-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">阿联酋 Amazon.ae 邮编64075（迪拜）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="ae" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('ae')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="ae-msg"></div>
-                    </div>
-                </div>
-                
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">沙特 Amazon.sa 邮编11462（利雅得）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="sa" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('sa')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="sa-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">土耳其 Amazon.com.tr 邮编01000（阿达纳）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="tr" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('tr')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="tr-msg"></div>
-                    </div>
-                    
-                    <!-- 亚洲区域只包含5个国家，此处保留空白用于未来扩展 -->
-                </div>
-            </div>
-        </details>
-        
-        <!-- 澳洲/南美洲 -->
-        <details class="region-group other">
-            <summary>澳洲/南美洲（4个国家）</summary>
-            <div class="columns-container">
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">澳大利亚 Amazon.com.au 邮编2600（堪培拉）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="au" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('au')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="au-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">智利 Amazon.com.cl 邮编8320000（圣地亚哥大区）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="cl" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('cl')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="cl-msg"></div>
-                    </div>
-                </div>
-                
-                <div class="column">
-                    <div class="query-group">
-                        <div class="region-title">巴西 Amazon.com.br 邮编70000-000（巴西利亚）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="br" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('br')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="br-msg"></div>
-                    </div>
-                    
-                    <div class="query-group">
-                        <div class="region-title">阿根廷 Amazon.com.ar 邮编C1430（布宜诺斯艾利斯）</div>
-                        <div class="input-group">
-                            <input type="text" data-region="ar" placeholder="输入10位ASIN">
-                            <button onclick="openAsin('ar')">打开详情页</button>
-                        </div>
-                        <div class="validation" id="ar-msg"></div>
-                    </div>
-                </div>
-            </div>
-        </details>
-        
-        <!-- 功能增强脚本 -->
-        <script>
-            const baseUrls = {
-                us: 'https://www.amazon.com/dp/',
-                ca: 'https://www.amazon.ca/dp/',
-                uk: 'https://www.amazon.co.uk/dp/',
-                de: 'https://www.amazon.de/dp/',
-                fr: 'https://www.amazon.fr/dp/',
-                it: 'https://www.amazon.it/dp/',
-                es: 'https://www.amazon.es/dp/',
-                nl: 'https://www.amazon.nl/dp/',
-                be: 'https://www.amazon.com.be/dp/',
-                ie: 'https://www.amazon.ie/dp/',
-                se: 'https://www.amazon.se/dp/',
-                pl: 'https://www.amazon.pl/dp/',
-                au: 'https://www.amazon.com.au/dp/',
-                jp: 'https://www.amazon.co.jp/dp/',
-                mx: 'https://www.amazon.com.mx/dp/',
-                cl: 'https://www.amazon.com.cl/dp/',
-                br: 'https://www.amazon.com.br/dp/',
-                ar: 'https://www.amazon.com.ar/dp/',
-                sg: 'https://www.amazon.sg/dp/',
-                ae: 'https://www.amazon.ae/dp/',
-                sa: 'https://www.amazon.sa/dp/',
-                tr: 'https://www.amazon.com.tr/dp/'
-            };
 
-            function openAsin(region) {
-                const input = document.querySelector(`input[data-region="${region}"]`);
-                const asin = input.value.trim();
-                const validationMsg = document.getElementById(`${region}-msg`);
-                
-                if (asin.length !== 10) {
-                    validationMsg.textContent = 'ASIN必须为10位字符';
-                    validationMsg.style.color = '#dc3545';
-                    input.focus();
-                    input.select();
-                    return;
-                }
-                
-                // 清除验证消息
-                validationMsg.textContent = '';
-                
-                const url = baseUrls[region] + encodeURIComponent(asin);
-                window.open(url, '_blank');
-                
-                // 高亮反馈并清空输入
-                input.value = '';
-                const parentGroup = input.closest('.query-group');
-                parentGroup.classList.add('highlight');
-                setTimeout(() => {
-                    parentGroup.classList.remove('highlight');
-                }, 1500);
-            }
-
-            // 页面加载后初始化
-            document.addEventListener('DOMContentLoaded', () => {
-                const inputs = document.querySelectorAll('input[data-region]');
-                
-                inputs.forEach(input => {
-                    const region = input.dataset.region;
-                    const validationMsg = document.getElementById(`${region}-msg`);
-                    
-                    input.addEventListener('input', () => {
-                        const asin = input.value.trim();
-                        
-                        if (asin.length === 10) {
-                            input.style.borderColor = '#28a745';
-                            validationMsg.textContent = '格式正确!';
-                            validationMsg.style.color = '#28a745';
-                        } else {
-                            input.style.borderColor = asin.length > 10 ? '#dc3545' : '#ced4da';
-                            validationMsg.textContent = asin.length > 10 ? '长度不能超过10个字符' : '';
-                            validationMsg.style.color = '#dc3545';
-                        }
-                    });
-                    
-                    // 添加键盘支持
-                    input.addEventListener('keyup', (e) => {
-                        if (e.key === 'Enter') {
-                            openAsin(region);
-                        }
-                    });
-                });
-                
-                // 默认打开北美区域
-                document.querySelector('.north-america').open = true;
-            });
-        </script>
+  <!-- ASIN 查询 -->
+  <div class="section">
+    <div class="title">ASIN 跳转</div>
+    <div class="flex-row">
+      <select id="asin-country" onchange="onAsinChange()"></select>
+      <span id="postal-display">—</span>
+      <button onclick="copyPostalCode()">复制邮编</button>
+      <input type="text" id="asin" placeholder="请输入 ASIN" maxlength="10">
+      <button onclick="goToAmazon()">跳转</button>
     </div>
-    
-    <footer class="footer">
-        <p>可快速访问全球各大Amazon站点</p>
-        <p>注意：所有ASIN均为10位字符长度，输入验证自动开启</p>
-    </footer>
+    <div class="error" id="asin-error">请输入10位字符的有效 ASIN。</div>
+  </div>
+
+  <!-- 订单查询 -->
+
+  <div class="warning">
+   	<p>多渠道订单需使用 S 开头的亚马逊自动生成订单号进行查询。</p>
+	<p>026 / 202-206 → 英国</p>
+	<p>028 / 302-306 → 德国</p>
+	<p>111-114 → 美国</p>
+	<p>171 / 402-408 → 欧洲多国（比利时、法国、荷兰等）及印度</p>
+	<p>249-250 / 503 → 澳洲、日本</p>
+	<p>701-702 → 美洲三国（巴西、加拿大、墨西哥）</p>
+  </div>
+  <div class="section">
+    <div class="title">订单号跳转</div>
+    <div class="flex-row">
+      <select id="order-region" onchange="onOrderChange()"></select>
+      <input type="text" id="order-id" placeholder="请输入订单号">
+      <button onclick="goToOrder()">跳转</button>
+    </div>
+  </div>
+
+  <!-- 物流查询 -->
+  <div class="section">
+    <div class="title">物流追踪码跳转</div>
+    <div class="flex-row">
+      <select id="logistics" onchange="onLogisticsChange()"></select>
+      <input type="text" id="tracking" placeholder="请输入追踪码">
+      <button onclick="goToLogistics()">跳转</button>
+    </div>
+  </div>
+
+  <!-- 弹出提示框 -->
+  <div id="toast"></div>
+
+  <script>
+    // 工具函数 - 显示提示信息
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      toast.style.animation = 'fadein 0.3s';
+      
+      // 自动消失
+      setTimeout(() => {
+        toast.style.animation = 'fadeout 0.3s';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 300);
+      }, duration);
+    }
+
+    // ---------- ASIN 国家配置 ----------
+    const countries = [
+      { code: 'com', name: '美国 (.com)', postalCode: '10010', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'ca', name: '加拿大 (.ca)', postalCode: 'K7L 2H9', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'mx', name: '墨西哥 (.mx)', postalCode: '04510', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'co.uk', name: '英国 (.co.uk)', postalCode: 'N20 8JJ', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'de', name: '德国 (.de)', postalCode: '10115', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'fr', name: '法国 (.fr)', postalCode: '75000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'it', name: '意大利 (.it)', postalCode: '50100', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'es', name: '西班牙 (.es)', postalCode: '08000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'nl', name: '荷兰 (.nl)', postalCode: '1000AA', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'be', name: '比利时 (.be)', postalCode: '1000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'ie', name: '爱尔兰 (.ie)', postalCode: '999015', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'se', name: '瑞典 (.se)', postalCode: '23168', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'pl', name: '波兰 (.pl)', postalCode: '00-001', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'co.jp', name: '日本 (.co.jp)', postalCode: '163-8001', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'sg', name: '新加坡 (.sg)', postalCode: '546080', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'ae', name: '阿联酋 (.ae)', postalCode: '64075', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'sa', name: '沙特 (.sa)', postalCode: '11462', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'tr', name: '土耳其 (.tr)', postalCode: '01000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'in', name: '印度 (.in)', postalCode: '110001', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'com.au', name: '澳大利亚 (com.au)', postalCode: '2600', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'com.cl', name: '智利 (com.cl)', postalCode: '8320000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'com.br', name: '巴西 (com.br)', postalCode: '70000-000', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+      { code: 'com.ar', name: '阿根廷 (com.ar)', postalCode: 'C1430', placeholder: '请输入ASIN（如：B0DLBTPDCS）' },
+    ];
+
+    const asinCountrySelect = document.getElementById('asin-country');
+    const asinInput = document.getElementById('asin');
+    const asinError = document.getElementById('asin-error');
+    const postalDisplay = document.getElementById('postal-display');
+
+    // 初始化国家选择
+    function initAsinCountrySelect() {
+      countries.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.code;
+        option.textContent = c.name;
+        asinCountrySelect.appendChild(option);
+      });
+    }
+
+    function onAsinChange() {
+      const selected = asinCountrySelect.value;
+      const country = countries.find(c => c.code === selected);
+      asinInput.placeholder = country.placeholder;
+      postalDisplay.textContent = country.postalCode;
+      asinError.style.display = 'none';
+    }
+
+    function goToAmazon() {
+      const asin = asinInput.value.trim();
+      const selected = asinCountrySelect.value;
+      
+      if (asin.length !== 10) {
+        asinError.style.display = 'block';
+        return;
+      }
+      
+      asinError.style.display = 'none';
+      const url = `https://www.amazon.${selected}/dp/${asin}`;
+      window.open(url, '_blank');
+      asinInput.value = '';
+    }
+
+    async function copyPostalCode() {
+      const selected = asinCountrySelect.value;
+      const country = countries.find(c => c.code === selected);
+      
+      try {
+        await navigator.clipboard.writeText(country.postalCode);
+        showToast(`已复制 ${country.name} 的邮编：${country.postalCode}`);
+      } catch (err) {
+        showToast('复制失败，请手动复制', 3000);
+      }
+    }
+
+    // 添加键盘事件监听
+    function setupEventListeners() {
+      asinInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') goToAmazon();
+      });
+    }
+
+    // ---------- 订单查询 ----------
+    const orderRegions = [
+      { code: 'us', name: '北美 (US)', url: 'https://sellercentral.amazon.com/orders-v3/order/', placeholder: '请输入订单号' },
+      { code: 'uk', name: '英国 (UK)', url: 'https://sellercentral.amazon.co.uk/orders-v3/order/', placeholder: '请输入订单号' },
+      { code: 'au', name: '澳洲 (AU)', url: 'https://sellercentral.amazon.com.au/orders-v3/order/', placeholder: '请输入订单号' },
+      { code: 'jp', name: '日本 (JP)', url: 'https://sellercentral-japan.amazon.com/orders-v3/order/', placeholder: '请输入订单号' }
+    ];
+
+    const orderSelect = document.getElementById('order-region');
+    const orderInput = document.getElementById('order-id');
+
+    function initOrderSelect() {
+      orderRegions.forEach(r => {
+        const option = document.createElement('option');
+        option.value = r.code;
+        option.textContent = r.name;
+        orderSelect.appendChild(option);
+      });
+    }
+
+    function onOrderChange() {
+      const selected = orderSelect.value;
+      const region = orderRegions.find(r => r.code === selected);
+      orderInput.placeholder = region.placeholder;
+    }
+
+    function goToOrder() {
+      const code = orderSelect.value;
+      const id = orderInput.value.trim();
+      if (!id) return;
+      
+      const region = orderRegions.find(r => r.code === code);
+      const url = region.url + encodeURIComponent(id);
+      window.open(url, '_blank');
+    }
+
+    // ---------- 物流查询 ----------
+    const logistics = [
+      { code: 'fedex', name: 'Fedex', url: 'https://www.fedex.com/fedextrack/?tracknumbers=', placeholder: '请输入追踪码'},
+      { code: 'ups', name: 'UPS', url: 'https://www.ups.com/track?tracknum=', placeholder: '请输入追踪码'},
+      { code: 'usps', name: 'USPS', url: 'https://tools.usps.com/go/TrackConfirmAction?tLabels=', placeholder: '请输入追踪码'},
+      { code: 'dhlus', name: 'DHL美国', url: 'https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=', placeholder: '请输入追踪码'},
+      { code: 'dhlde', name: 'DHL德国', url: 'https://www.dhl.com/de-en/home/tracking/tracking-parcel.html?submit=1&tracking-id=', placeholder: '请输入追踪码'}
+    ];
+
+    const logisticsSelect = document.getElementById('logistics');
+    const trackingInput = document.getElementById('tracking');
+
+    function initLogisticsSelect() {
+      logistics.forEach(l => {
+        const option = document.createElement('option');
+        option.value = l.code;
+        option.textContent = l.name;
+        logisticsSelect.appendChild(option);
+      });
+    }
+
+    function onLogisticsChange() {
+      const selected = logisticsSelect.value;
+      const item = logistics.find(l => l.code === selected);
+      trackingInput.placeholder = item.placeholder;
+    }
+
+    function goToLogistics() {
+      const code = logisticsSelect.value;
+      const id = trackingInput.value.trim();
+      if (!id) return;
+      
+      const item = logistics.find(l => l.code === code);
+      let url = item.url + encodeURIComponent(id);
+      if (item.extra) url += item.extra;
+      window.open(url, '_blank');
+    }
+
+    // 初始化所有组件
+    function init() {
+      initAsinCountrySelect();
+      initOrderSelect();
+      initLogisticsSelect();
+      setupEventListeners();
+      
+      // 设置默认值
+      onAsinChange();
+      onOrderChange();
+      onLogisticsChange();
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
